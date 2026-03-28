@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadSocialLinks();
     loadSettings();
     loadPopupSettings(); // Popup ayarları sayfa yüklendiğinde de yüklenir
+    loadGifBanners(); // GIF Banner ayarlarını yükle
     initializeEventHandlers();
 
     // Load admin users if super admin
@@ -164,6 +165,25 @@ document.addEventListener('DOMContentLoaded', async function() {
             await loadSites(); // Sites yüklenerek dropdown doldurulur
             loadPopupSettings(); // Popup ayarları yüklenir
         });
+    }
+
+    // Load GIF banners when the tab is accessed
+    const gifBannersTab = document.getElementById('gif-banners-tab');
+    if (gifBannersTab) {
+        gifBannersTab.addEventListener('shown.bs.tab', function() {
+            loadGifBanners();
+        });
+    }
+
+    // GIF Banner form handlers
+    const desktopGifForm = document.getElementById('desktopGifForm');
+    if (desktopGifForm) {
+        desktopGifForm.addEventListener('submit', handleGifBannerSubmit);
+    }
+
+    const mobileGifForm = document.getElementById('mobileGifForm');
+    if (mobileGifForm) {
+        mobileGifForm.addEventListener('submit', handleGifBannerSubmit);
     }
 });
 
@@ -1517,3 +1537,157 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// GIF Banner Management Functions
+
+// Load GIF banners for both desktop and mobile
+async function loadGifBanners() {
+    try {
+        const data = await apiRequest('api.php?action=get_gif_banners');
+        if (data && data.gif_banners) {
+            renderGifBanner('desktop', data.gif_banners.desktop);
+            renderGifBanner('mobile', data.gif_banners.mobile);
+        }
+    } catch (error) {
+        console.error('GIF bannerlar yüklenirken hata:', error);
+    }
+}
+
+// Render GIF banner preview and form values
+function renderGifBanner(type, banner) {
+    const previewContainer = document.getElementById(`${type}PreviewContainer`);
+    const previewDiv = document.getElementById(`${type}BannerPreview`);
+    const linkInput = document.getElementById(`${type}GifLink`);
+    const activeInput = document.getElementById(`${type}GifActive`);
+    const statusBadge = document.getElementById(`${type}BannerStatus`);
+
+    if (banner && banner.url) {
+        // Show preview container
+        if (previewContainer) previewContainer.style.display = 'block';
+
+        // Create preview element based on file type
+        if (previewDiv) {
+            const url = '../' + banner.url;
+            const isVideo = banner.url.endsWith('.mp4') || banner.url.endsWith('.webm');
+
+            if (isVideo) {
+                previewDiv.innerHTML = `
+                    <video src="${url}" autoplay loop muted playsinline style="width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px;">
+                        Video desteklenmiyor
+                    </video>
+                `;
+            } else {
+                previewDiv.innerHTML = `
+                    <img src="${url}" style="width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px;" />
+                `;
+            }
+        }
+
+        if (linkInput) linkInput.value = banner.link || '';
+        if (activeInput) activeInput.checked = !!banner.active;
+
+        // Update status badge
+        if (statusBadge) {
+            if (banner.active) {
+                statusBadge.className = 'badge bg-success';
+                statusBadge.textContent = 'Aktif';
+            } else {
+                statusBadge.className = 'badge bg-secondary';
+                statusBadge.textContent = 'Pasif';
+            }
+        }
+    } else {
+        // Hide preview container
+        if (previewContainer) previewContainer.style.display = 'none';
+        if (previewDiv) previewDiv.innerHTML = '';
+        if (linkInput) linkInput.value = '';
+        if (activeInput) activeInput.checked = false;
+
+        // Update status badge
+        if (statusBadge) {
+            statusBadge.className = 'badge bg-secondary';
+            statusBadge.textContent = 'Yüklenmedi';
+        }
+    }
+}
+
+// Handle GIF banner form submit (desktop or mobile)
+async function handleGifBannerSubmit(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const type = formData.get('type'); // 'desktop' or 'mobile'
+
+    if (!type) {
+        popup.error('Form tipi belirlenemedi.');
+        return;
+    }
+
+    const fileInput = form.querySelector('input[type="file"]');
+    const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+
+    if (hasFile) {
+        // Upload new file
+        formData.append('action', 'upload_gif_banner');
+    } else {
+        // Just update settings (link and active status)
+        formData.append('action', 'update_gif_banner');
+    }
+
+    const data = await apiRequest('api.php', {
+        method: 'POST',
+        body: formData
+    });
+
+    if (data && data.success) {
+        showToast(data.message);
+        loadGifBanners();
+        // Reset file input
+        if (fileInput) fileInput.value = '';
+    } else {
+        popup.error(data?.message || 'Bir hata oluştu');
+    }
+}
+
+// Delete GIF banner
+async function deleteGifBanner(type) {
+    popup.confirm(
+        'GIF Banner Silme Onayı',
+        `${type === 'desktop' ? 'Masaüstü' : 'Mobil'} GIF banner'ı silmek istediğinizden emin misiniz?`,
+        async () => {
+            const data = await apiRequest('api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'delete_gif_banner',
+                    type: type
+                })
+            });
+
+            if (data && data.success) {
+                showToast(data.message);
+                loadGifBanners();
+            } else {
+                popup.error(data?.message || 'Silme işlemi başarısız');
+            }
+        }
+    );
+}
+
+// Toggle GIF banner active status
+async function toggleGifBanner(type) {
+    const data = await apiRequest('api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'toggle_gif_banner',
+            type: type
+        })
+    });
+
+    if (data && data.success) {
+        showToast(data.message);
+        loadGifBanners();
+    }
+}
