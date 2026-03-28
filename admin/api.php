@@ -1052,7 +1052,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'upload_gif_banner':
             $type = $_POST['type'] ?? ''; // desktop veya mobile
-            $link = $_POST['link'] ?? '';
 
             if (!in_array($type, ['desktop', 'mobile'])) {
                 echo json_encode(['success' => false, 'message' => 'Geçersiz banner tipi. desktop veya mobile olmalı.']);
@@ -1104,16 +1103,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Data güncelle
                 if (!isset($data['gif_banners'])) {
                     $data['gif_banners'] = [
-                        'desktop' => ['url' => '', 'link' => '', 'active' => false],
-                        'mobile' => ['url' => '', 'link' => '', 'active' => false]
+                        'site_id' => 0,
+                        'link' => '',
+                        'desktop' => ['url' => '', 'active' => false],
+                        'mobile' => ['url' => '', 'active' => false]
                     ];
                 }
 
-                $data['gif_banners'][$type] = [
-                    'url' => 'img/banners/' . $filename,
-                    'link' => $link,
-                    'active' => true
-                ];
+                $data['gif_banners'][$type]['url'] = 'img/banners/' . $filename;
+                $data['gif_banners'][$type]['active'] = true;
 
                 if (saveData($data)) {
                     echo json_encode(['success' => true, 'message' => ucfirst($type) . ' GIF banner başarıyla yüklendi.', 'url' => 'img/banners/' . $filename]);
@@ -1127,7 +1125,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'update_gif_banner':
             $type = $_POST['type'] ?? ''; // desktop veya mobile
-            $link = $_POST['link'] ?? '';
             $active = isset($_POST['active']) && ($_POST['active'] === 'true' || $_POST['active'] === '1' || $_POST['active'] === 'on');
 
             if (!in_array($type, ['desktop', 'mobile'])) {
@@ -1137,16 +1134,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!isset($data['gif_banners'])) {
                 $data['gif_banners'] = [
-                    'desktop' => ['url' => '', 'link' => '', 'active' => false],
-                    'mobile' => ['url' => '', 'link' => '', 'active' => false]
+                    'site_id' => 0,
+                    'link' => '',
+                    'desktop' => ['url' => '', 'active' => false],
+                    'mobile' => ['url' => '', 'active' => false]
                 ];
             }
 
-            $data['gif_banners'][$type]['link'] = $link;
             $data['gif_banners'][$type]['active'] = $active;
 
             if (saveData($data)) {
                 echo json_encode(['success' => true, 'message' => ucfirst($type) . ' GIF banner ayarları güncellendi.']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Veri kaydedilirken hata oluştu.']);
+            }
+            break;
+
+        case 'update_gif_banner_site':
+            $site_id = intval($_POST['site_id'] ?? 0);
+
+            // Site'ın linkini bul
+            $site_link = '';
+            if ($site_id > 0 && isset($data['sites'])) {
+                foreach ($data['sites'] as $site) {
+                    if ($site['id'] == $site_id) {
+                        $site_link = $site['link'];
+                        break;
+                    }
+                }
+            }
+
+            if (!isset($data['gif_banners'])) {
+                $data['gif_banners'] = [
+                    'site_id' => 0,
+                    'link' => '',
+                    'desktop' => ['url' => '', 'active' => false],
+                    'mobile' => ['url' => '', 'active' => false]
+                ];
+            }
+
+            $data['gif_banners']['site_id'] = $site_id;
+            $data['gif_banners']['link'] = $site_link;
+
+            if (saveData($data)) {
+                echo json_encode(['success' => true, 'message' => 'GIF banner site ayarı güncellendi.', 'link' => $site_link]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Veri kaydedilirken hata oluştu.']);
             }
