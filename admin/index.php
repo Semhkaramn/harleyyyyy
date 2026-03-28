@@ -269,7 +269,7 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                                 <span class="badge bg-secondary" id="desktopBannerStatus">Yüklenmedi</span>
                             </div>
                             <div class="card-body">
-                                <form id="desktopGifForm" enctype="multipart/form-data">
+                                <form id="desktopGifForm" enctype="multipart/form-data" method="post" action="javascript:void(0);">
                                     <input type="hidden" name="type" value="desktop">
 
                                     <div class="mb-3">
@@ -317,7 +317,7 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                                 <span class="badge bg-secondary" id="mobileBannerStatus">Yüklenmedi</span>
                             </div>
                             <div class="card-body">
-                                <form id="mobileGifForm" enctype="multipart/form-data">
+                                <form id="mobileGifForm" enctype="multipart/form-data" method="post" action="javascript:void(0);">
                                     <input type="hidden" name="type" value="mobile">
 
                                     <div class="mb-3">
