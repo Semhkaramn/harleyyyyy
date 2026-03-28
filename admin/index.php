@@ -228,7 +228,34 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                         <div class="alert alert-info mb-4">
                             <i class="bi bi-info-circle me-2"></i>
                             <strong>Bilgi:</strong> GIF bannerlar header'ın hemen altında, arama çubuğunun üstünde görüntülenir.
-                            Masaüstü ve mobil için ayrı GIF/Video yükleyebilirsiniz. Görsel otomatik olarak ekrana tam sığacak şekilde ölçeklenir.
+                            Masaüstü ekranlarda masaüstü banner, mobil ekranlarda mobil banner gösterilir. Görsel otomatik olarak ekrana tam sığacak şekilde ölçeklenir.
+                        </div>
+                    </div>
+
+                    <!-- Ortak Site Seçimi -->
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-link-45deg"></i> Tıklanınca Gidilecek Site
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Site Seçimi</label>
+                                        <select class="form-select" id="gifBannerSiteId">
+                                            <option value="">Site Seçin</option>
+                                            <!-- Siteler JS ile yüklenecek -->
+                                        </select>
+                                        <small class="text-muted">Banner'a tıklandığında kullanıcı bu siteye yönlendirilecek</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Seçilen Site Linki</label>
+                                        <input type="text" class="form-control" id="gifBannerSelectedLink" readonly placeholder="Site seçildiğinde link burada görünecek">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -239,7 +266,7 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                                 <h5 class="mb-0">
                                     <i class="bi bi-display"></i> Masaüstü GIF Banner
                                 </h5>
-                                <span class="badge bg-secondary" id="desktopBannerStatus">Pasif</span>
+                                <span class="badge bg-secondary" id="desktopBannerStatus">Yüklenmedi</span>
                             </div>
                             <div class="card-body">
                                 <form id="desktopGifForm" enctype="multipart/form-data">
@@ -256,11 +283,6 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                                     <div class="mb-3" id="desktopPreviewContainer" style="display: none;">
                                         <label class="form-label">Mevcut Banner</label>
                                         <div class="banner-preview" id="desktopBannerPreview"></div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Tıklanınca Gidilecek Link</label>
-                                        <input type="url" class="form-control" name="link" id="desktopGifLink" placeholder="https://example.com">
                                     </div>
 
                                     <div class="mb-3">
@@ -292,7 +314,7 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                                 <h5 class="mb-0">
                                     <i class="bi bi-phone"></i> Mobil GIF Banner
                                 </h5>
-                                <span class="badge bg-secondary" id="mobileBannerStatus">Pasif</span>
+                                <span class="badge bg-secondary" id="mobileBannerStatus">Yüklenmedi</span>
                             </div>
                             <div class="card-body">
                                 <form id="mobileGifForm" enctype="multipart/form-data">
@@ -309,11 +331,6 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                                     <div class="mb-3" id="mobilePreviewContainer" style="display: none;">
                                         <label class="form-label">Mevcut Banner</label>
                                         <div class="banner-preview" id="mobileBannerPreview"></div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Tıklanınca Gidilecek Link</label>
-                                        <input type="url" class="form-control" name="link" id="mobileGifLink" placeholder="https://example.com">
                                     </div>
 
                                     <div class="mb-3">
