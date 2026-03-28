@@ -1,4 +1,16 @@
 {
+    "gif_banners": {
+        "desktop": {
+            "url": "",
+            "link": "",
+            "active": false
+        },
+        "mobile": {
+            "url": "",
+            "link": "",
+            "active": false
+        }
+    },
     "social_links": {
         "telegram": "https:\/\/t.me\/Harleyquinnn1",
         "instagram": "",
