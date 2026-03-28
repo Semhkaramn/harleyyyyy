@@ -66,9 +66,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             break;
 
         case 'get_gif_banners':
-            echo json_encode([
-                'gif_banners' => $data['gif_banners'] ?? ['desktop' => ['url' => '', 'link' => '', 'active' => false], 'mobile' => ['url' => '', 'link' => '', 'active' => false]]
-            ]);
+            $default_gif_banners = [
+                'site_id' => 0,
+                'link' => '',
+                'desktop' => ['url' => '', 'active' => false],
+                'mobile' => ['url' => '', 'active' => false]
+            ];
+            $gif_banners = $data['gif_banners'] ?? $default_gif_banners;
+            // Ensure site_id exists
+            if (!isset($gif_banners['site_id'])) {
+                $gif_banners['site_id'] = 0;
+            }
+            echo json_encode(['gif_banners' => $gif_banners]);
             break;
 
         case 'get_banners':
