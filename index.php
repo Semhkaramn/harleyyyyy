@@ -13,6 +13,7 @@ $banners = $data['banners'] ?? [];
 $sections = $data['sections'] ?? [];
 $categories = $data['categories'] ?? [];
 $popup = $data['popup'] ?? [];
+$gif_banners = $data['gif_banners'] ?? ['desktop' => ['url' => '', 'link' => '', 'active' => false], 'mobile' => ['url' => '', 'link' => '', 'active' => false]];
 $sites = array_filter($data['sites'] ?? [], function($site) {
     return $site['active'] === true;
 });
@@ -261,7 +262,51 @@ if (isset($data['slots'])) {
         </div>
     </header>
 
+    <?php
+    // GIF Banner Section - Header altında, Search üstünde
+    $desktop_banner = $gif_banners['desktop'] ?? null;
+    $mobile_banner = $gif_banners['mobile'] ?? null;
+    $has_desktop = $desktop_banner && !empty($desktop_banner['url']) && !empty($desktop_banner['active']);
+    $has_mobile = $mobile_banner && !empty($mobile_banner['url']) && !empty($mobile_banner['active']);
 
+    if ($has_desktop || $has_mobile):
+    ?>
+    <section class="gif-banner-section">
+        <div class="gif-banner-container">
+            <?php if ($has_desktop): ?>
+            <?php
+            $desktop_url = $desktop_banner['url'];
+            $is_desktop_video = preg_match('/\.(mp4|webm)$/i', $desktop_url);
+            ?>
+            <a href="<?= htmlspecialchars($desktop_banner['link'] ?? '#') ?>" target="_blank" class="gif-banner gif-banner-desktop" rel="noopener noreferrer">
+                <?php if ($is_desktop_video): ?>
+                <video autoplay loop muted playsinline>
+                    <source src="<?= htmlspecialchars($desktop_url) ?>" type="video/<?= pathinfo($desktop_url, PATHINFO_EXTENSION) ?>">
+                </video>
+                <?php else: ?>
+                <img src="<?= htmlspecialchars($desktop_url) ?>" alt="Banner" loading="eager">
+                <?php endif; ?>
+            </a>
+            <?php endif; ?>
+
+            <?php if ($has_mobile): ?>
+            <?php
+            $mobile_url = $mobile_banner['url'];
+            $is_mobile_video = preg_match('/\.(mp4|webm)$/i', $mobile_url);
+            ?>
+            <a href="<?= htmlspecialchars($mobile_banner['link'] ?? '#') ?>" target="_blank" class="gif-banner gif-banner-mobile" rel="noopener noreferrer">
+                <?php if ($is_mobile_video): ?>
+                <video autoplay loop muted playsinline>
+                    <source src="<?= htmlspecialchars($mobile_url) ?>" type="video/<?= pathinfo($mobile_url, PATHINFO_EXTENSION) ?>">
+                </video>
+                <?php else: ?>
+                <img src="<?= htmlspecialchars($mobile_url) ?>" alt="Banner" loading="eager">
+                <?php endif; ?>
+            </a>
+            <?php endif; ?>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <main>
         <!-- Search Section -->
