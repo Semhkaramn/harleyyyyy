@@ -1,0 +1,209 @@
+{
+    "social_links": {
+        "telegram": "https:\/\/t.me\/Harleyquinnn1",
+        "instagram": "",
+        "youtube": "",
+        "twitter": "",
+        "facebook": "",
+        "discord": "",
+        "whatsapp": "",
+        "tiktok": "",
+        "teams": "",
+        "email": ""
+    },
+    "sections": {
+        "section1": {
+            "title": "<span>ANA<\/span> Sponsorlar",
+            "active": true
+        },
+        "section2": {
+            "title": " <span>VİP<\/span> Sponsorlar",
+            "active": true
+        }
+    },
+    "sites": [
+        {
+            "id": 6,
+            "name": "AVVABET",
+            "logo": "avvabet_1771064558.png",
+            "link": "https:\/\/harlink.site\/avvabet",
+            "description": "500 Freespin Veya 500 Freebet Deneme Bonusu",
+            "active": true,
+            "created_at": "2026-02-14 10:22:38",
+            "updated_at": "2026-03-05 23:13:27"
+        },
+        {
+            "id": 8,
+            "name": "ESBET",
+            "logo": "esbet_1771064721.gif",
+            "link": "https:\/\/harlink.site\/esbet",
+            "description": "500₺ Deneme Bonusu",
+            "active": true,
+            "created_at": "2026-02-14 10:25:21",
+            "updated_at": "2026-03-05 23:13:33"
+        },
+        {
+            "id": 11,
+            "name": "ROKETBET",
+            "logo": "roketbet_1771437802.gif",
+            "link": "https:\/\/harlink.site\/roketbet",
+            "description": "2500₺ Çekimli Deneme Bonusu",
+            "active": true,
+            "created_at": "2026-02-18 18:03:22",
+            "updated_at": "2026-03-05 23:13:48"
+        },
+        {
+            "id": 14,
+            "name": "RİTZBET",
+            "logo": "rtzbet_1771953741.png",
+            "link": "https:\/\/harlink.site\/ritzbet",
+            "description": "300₺ DENEME BONUSU",
+            "active": true,
+            "created_at": "2026-02-24 17:22:21",
+            "updated_at": "2026-03-05 23:13:54"
+        },
+        {
+            "id": 15,
+            "name": "HEYBET",
+            "logo": "heybet_1772215318.png",
+            "link": "https:\/\/harlink.site\/heybet",
+            "description": "500₺ DENEME BONUSU",
+            "active": true,
+            "created_at": "2026-02-27 18:01:58",
+            "updated_at": "2026-03-05 23:14:01"
+        },
+        {
+            "id": 16,
+            "name": "BUGİBET",
+            "logo": "bugbet_1772284359.png",
+            "link": "https:\/\/harlink.site\/bugibet",
+            "description": "%300 İLK YATIRIM BONUSU",
+            "active": true,
+            "created_at": "2026-02-28 13:12:39",
+            "updated_at": "2026-03-05 23:14:09"
+        },
+        {
+            "id": 17,
+            "name": "ZENBET",
+            "logo": "zenbet_1772286196.png",
+            "link": "https:\/\/harlink.site\/zenbet",
+            "description": "555 Freespin & 100 Freebet Deneme Bonusu",
+            "active": true,
+            "created_at": "2026-02-28 13:43:16",
+            "updated_at": "2026-03-05 23:14:17"
+        },
+        {
+            "id": 18,
+            "name": "CASİCOSTA",
+            "logo": "cascosta_1772542451.png",
+            "link": "https:\/\/harlink.site\/casicosta",
+            "description": "1000₺ Değerinde Deneme Bonusu",
+            "active": true,
+            "created_at": "2026-03-03 12:54:11",
+            "updated_at": "2026-03-05 23:14:25"
+        },
+        {
+            "id": 19,
+            "name": "mariobet",
+            "logo": "mariobet_1773061806.png",
+            "link": "https:\/\/harlink.site\/mariobet",
+            "description": "Harley1000 Kodu ile 1000₺ Deneme Bonusu",
+            "active": true,
+            "created_at": "2026-03-09 13:10:06"
+        },
+        {
+            "id": 20,
+            "name": "olaycasino",
+            "logo": "olaycasino_1774713979.png",
+            "link": "https:\/\/harlink.site\/olaycasino",
+            "description": "500₺ DENEME BONUSU",
+            "active": true,
+            "created_at": "2026-03-28 16:06:19"
+        }
+    ],
+    "banners": [
+        {
+            "id": 2,
+            "site_id": 6,
+            "title": "<span>500 Freespin<\/span> Veya <span>500 Freebet<\/span> Deneme Bonusu",
+            "link": "https:\/\/harlink.site\/avvabet",
+            "type": "second",
+            "order": 3,
+            "active": true
+        },
+        {
+            "id": 3,
+            "site_id": 17,
+            "title": "<span>İLK YATIRIMA<\/span> 5000₺<span> KAYIP BONUSU<\/span>",
+            "link": "https:\/\/harlink.site\/zenbet",
+            "type": "second",
+            "active": true,
+            "order": 1
+        }
+    ],
+    "categories": {
+        "section1": [
+            17,
+            6,
+            8,
+            15
+        ],
+        "section2": [
+            20,
+            19,
+            14,
+            18,
+            11,
+            16
+        ]
+    },
+    "popup": {
+        "number": "İLK YATIRIMA %100 KAYIP BONUS",
+        "title": "5000₺'ye kadar %100 kayıp bonusu",
+        "subtitle": "Ramazana özel %35 kayıp bonusu",
+        "site_id": 17,
+        "active": true
+    },
+    "slots": [
+        {
+            "id": 1,
+            "title": "<span>MS. HARLEY <\/span> TELEGRAM",
+            "link": "https:\/\/t.me\/HarleyCasinoDuyuru",
+            "text": "Duyuru Kanalı",
+            "type": "telegram",
+            "active": true
+        },
+        {
+            "id": 2,
+            "title": "<span>MS. HARLEY <\/span> TELEGRAM",
+            "link": "https:\/\/t.me\/HarleyCasino",
+            "text": "Sohbet Grubu",
+            "type": "telegram",
+            "active": true
+        },
+        {
+            "id": 4,
+            "title": "<span>MS. HARLEY <\/span> TELEGRAM",
+            "link": "https:\/\/t.me\/HarleyKod",
+            "text": "Kod Duyuru Kanalı",
+            "type": "telegram",
+            "active": true
+        },
+        {
+            "id": 5,
+            "title": "<span>MS. HARLEY <\/span> TELEGRAM",
+            "link": "https:\/\/t.me\/HarleyKodSohbet",
+            "text": "Kod Sohbet Grubu",
+            "type": "telegram",
+            "active": true
+        },
+        {
+            "id": 6,
+            "title": "<span>MS. HARLEY <\/span> TELEGRAM",
+            "link": "https:\/\/t.me\/harleydestek",
+            "text": "Destek & İletişim",
+            "type": "telegram",
+            "active": true
+        }
+    ]
+}
