@@ -60,7 +60,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             echo json_encode([
                 'hero' => $data['hero'] ?? [],
                 'sections' => $data['sections'] ?? [],
-                'popup' => $data['popup'] ?? []
+                'popup' => $data['popup'] ?? [],
+                'gif_banners' => $data['gif_banners'] ?? ['desktop' => ['url' => '', 'link' => '', 'active' => false], 'mobile' => ['url' => '', 'link' => '', 'active' => false]]
+            ]);
+            break;
+
+        case 'get_gif_banners':
+            echo json_encode([
+                'gif_banners' => $data['gif_banners'] ?? ['desktop' => ['url' => '', 'link' => '', 'active' => false], 'mobile' => ['url' => '', 'link' => '', 'active' => false]]
             ]);
             break;
 
@@ -91,14 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             echo json_encode(['error' => 'Geçersiz action']);
 
         case 'get_analytics':
-                    $analytics_file = '../data/analytics.json';
-                    if (file_exists($analytics_file)) {
-                        $analytics = json_decode(file_get_contents($analytics_file), true);
-                        echo json_encode(['analytics' => $analytics]);
-                    } else {
-                        echo json_encode(['analytics' => null]);
-                    }
-                    break;
+            $analytics_file = '../data/analytics.json';
+            if (file_exists($analytics_file)) {
+                $analytics = json_decode(file_get_contents($analytics_file), true);
+                echo json_encode(['analytics' => $analytics]);
+            } else {
+                echo json_encode(['analytics' => null]);
+            }
+            break;
     }
     exit;
 }
@@ -1043,106 +1050,261 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             break;
 
+        case 'upload_gif_banner':
+            $type = $_POST['type'] ?? ''; // desktop veya mobile
+            $link = $_POST['link'] ?? '';
+
+            if (!in_array($type, ['desktop', 'mobile'])) {
+                echo json_encode(['success' => false, 'message' => 'Geçersiz banner tipi. desktop veya mobile olmalı.']);
+                exit;
+            }
+
+            // GIF/Video upload
+            if (!isset($_FILES['gif']) || $_FILES['gif']['error'] !== UPLOAD_ERR_OK) {
+                echo json_encode(['success' => false, 'message' => 'GIF/Video dosyası gereklidir.']);
+                exit;
+            }
+
+            $file = $_FILES['gif'];
+            $allowed_types = ['image/gif', 'image/webp', 'video/mp4', 'video/webm'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime_type = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($mime_type, $allowed_types)) {
+                echo json_encode(['success' => false, 'message' => 'Sadece GIF, WEBP, MP4 ve WEBM dosyaları yüklenebilir.']);
+                exit;
+            }
+
+            // Max 50MB
+            if ($file['size'] > 50 * 1024 * 1024) {
+                echo json_encode(['success' => false, 'message' => 'Dosya boyutu 50MB\'dan büyük olamaz.']);
+                exit;
+            }
+
+            // Dosya uzantısını al
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = 'gif_banner_' . $type . '_' . time() . '.' . $extension;
+            $upload_path = '../img/banners/';
+
+            // Klasör yoksa oluştur
+            if (!file_exists($upload_path)) {
+                mkdir($upload_path, 0755, true);
+            }
+
+            // Eski dosyayı sil
+            if (isset($data['gif_banners'][$type]['url']) && !empty($data['gif_banners'][$type]['url'])) {
+                $old_file = $upload_path . basename($data['gif_banners'][$type]['url']);
+                if (file_exists($old_file)) {
+                    unlink($old_file);
+                }
+            }
+
+            if (move_uploaded_file($file['tmp_name'], $upload_path . $filename)) {
+                // Data güncelle
+                if (!isset($data['gif_banners'])) {
+                    $data['gif_banners'] = [
+                        'desktop' => ['url' => '', 'link' => '', 'active' => false],
+                        'mobile' => ['url' => '', 'link' => '', 'active' => false]
+                    ];
+                }
+
+                $data['gif_banners'][$type] = [
+                    'url' => 'img/banners/' . $filename,
+                    'link' => $link,
+                    'active' => true
+                ];
+
+                if (saveData($data)) {
+                    echo json_encode(['success' => true, 'message' => ucfirst($type) . ' GIF banner başarıyla yüklendi.', 'url' => 'img/banners/' . $filename]);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Veri kaydedilirken hata oluştu.']);
+                }
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Dosya yüklenirken hata oluştu.']);
+            }
+            break;
+
+        case 'update_gif_banner':
+            $type = $_POST['type'] ?? ''; // desktop veya mobile
+            $link = $_POST['link'] ?? '';
+            $active = isset($_POST['active']) && ($_POST['active'] === 'true' || $_POST['active'] === '1' || $_POST['active'] === 'on');
+
+            if (!in_array($type, ['desktop', 'mobile'])) {
+                echo json_encode(['success' => false, 'message' => 'Geçersiz banner tipi.']);
+                exit;
+            }
+
+            if (!isset($data['gif_banners'])) {
+                $data['gif_banners'] = [
+                    'desktop' => ['url' => '', 'link' => '', 'active' => false],
+                    'mobile' => ['url' => '', 'link' => '', 'active' => false]
+                ];
+            }
+
+            $data['gif_banners'][$type]['link'] = $link;
+            $data['gif_banners'][$type]['active'] = $active;
+
+            if (saveData($data)) {
+                echo json_encode(['success' => true, 'message' => ucfirst($type) . ' GIF banner ayarları güncellendi.']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Veri kaydedilirken hata oluştu.']);
+            }
+            break;
+
+        case 'delete_gif_banner':
+            $type = $input['type'] ?? ''; // desktop veya mobile
+
+            if (!in_array($type, ['desktop', 'mobile'])) {
+                echo json_encode(['success' => false, 'message' => 'Geçersiz banner tipi.']);
+                exit;
+            }
+
+            // Dosyayı sil
+            if (isset($data['gif_banners'][$type]['url']) && !empty($data['gif_banners'][$type]['url'])) {
+                $file_path = '../' . $data['gif_banners'][$type]['url'];
+                if (file_exists($file_path)) {
+                    unlink($file_path);
+                }
+            }
+
+            // Data güncelle
+            $data['gif_banners'][$type] = [
+                'url' => '',
+                'link' => '',
+                'active' => false
+            ];
+
+            if (saveData($data)) {
+                echo json_encode(['success' => true, 'message' => ucfirst($type) . ' GIF banner silindi.']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Veri kaydedilirken hata oluştu.']);
+            }
+            break;
+
+        case 'toggle_gif_banner':
+            $type = $input['type'] ?? ''; // desktop veya mobile
+
+            if (!in_array($type, ['desktop', 'mobile'])) {
+                echo json_encode(['success' => false, 'message' => 'Geçersiz banner tipi.']);
+                exit;
+            }
+
+            if (!isset($data['gif_banners'][$type])) {
+                echo json_encode(['success' => false, 'message' => 'Banner bulunamadı.']);
+                exit;
+            }
+
+            $data['gif_banners'][$type]['active'] = !$data['gif_banners'][$type]['active'];
+
+            if (saveData($data)) {
+                $status = $data['gif_banners'][$type]['active'] ? 'aktif' : 'pasif';
+                echo json_encode(['success' => true, 'message' => ucfirst($type) . " GIF banner $status hale getirildi."]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Veri kaydedilirken hata oluştu.']);
+            }
+            break;
+
         default:
             echo json_encode(['success' => false, 'message' => 'Geçersiz action']);
-            
+
         case 'track_click':
-                    $siteId = intval($input['site_id'] ?? 0);
-                    $location = $input['location'] ?? ''; // banner, popup, section1, section2
-                    $today = date('Y-m-d');
-                    
-                    $analytics_file = '../data/analytics.json';
-                    $analytics = [];
-                    
-                    if (file_exists($analytics_file)) {
-                        $analytics = json_decode(file_get_contents($analytics_file), true);
-                    }
-                    
-                    // Initialize structure if not exists
-                    if (!isset($analytics['site_clicks'])) {
-                        $analytics['site_clicks'] = ['banner' => [], 'popup' => [], 'section1' => [], 'section2' => []];
-                    }
-                    if (!isset($analytics['daily_stats'])) {
-                        $analytics['daily_stats'] = [];
-                    }
-                    if (!isset($analytics['total_stats'])) {
-                        $analytics['total_stats'] = ['total_page_visits' => 0, 'total_site_clicks' => 0];
-                    }
-                    
-                    // Track click by location and site
-                    if (!isset($analytics['site_clicks'][$location])) {
-                        $analytics['site_clicks'][$location] = [];
-                    }
-                    if (!isset($analytics['site_clicks'][$location][$siteId])) {
-                        $analytics['site_clicks'][$location][$siteId] = [];
-                    }
-                    if (!isset($analytics['site_clicks'][$location][$siteId][$today])) {
-                        $analytics['site_clicks'][$location][$siteId][$today] = 0;
-                    }
-                    
-                    // Increment click count
-                    $analytics['site_clicks'][$location][$siteId][$today]++;
-                    
-                    // Update daily stats
-                    if (!isset($analytics['daily_stats'][$today])) {
-                        $analytics['daily_stats'][$today] = ['clicks' => 0, 'visits' => 0];
-                    }
-                    $analytics['daily_stats'][$today]['clicks']++;
-                    
-                    // Update total stats
-                    $analytics['total_stats']['total_site_clicks']++;
-                    
-                    // Save analytics data
-                    if (file_put_contents($analytics_file, json_encode($analytics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-                        echo json_encode(['success' => true]);
-                    } else {
-                        echo json_encode(['success' => false, 'message' => 'Analytics kaydedilemedi']);
-                    }
-                    break;
-        
-                case 'track_visit':
-                    $today = date('Y-m-d');
-                    
-                    $analytics_file = '../data/analytics.json';
-                    $analytics = [];
-                    
-                    if (file_exists($analytics_file)) {
-                        $analytics = json_decode(file_get_contents($analytics_file), true);
-                    }
-                    
-                    // Initialize structure if not exists
-                    if (!isset($analytics['page_visits'])) {
-                        $analytics['page_visits'] = [];
-                    }
-                    if (!isset($analytics['daily_stats'])) {
-                        $analytics['daily_stats'] = [];
-                    }
-                    if (!isset($analytics['total_stats'])) {
-                        $analytics['total_stats'] = ['total_page_visits' => 0, 'total_site_clicks' => 0];
-                    }
-                    
-                    // Track page visit
-                    if (!isset($analytics['page_visits'][$today])) {
-                        $analytics['page_visits'][$today] = 0;
-                    }
-                    $analytics['page_visits'][$today]++;
-                    
-                    // Update daily stats
-                    if (!isset($analytics['daily_stats'][$today])) {
-                        $analytics['daily_stats'][$today] = ['clicks' => 0, 'visits' => 0];
-                    }
-                    $analytics['daily_stats'][$today]['visits']++;
-                    
-                    // Update total stats
-                    $analytics['total_stats']['total_page_visits']++;
-                    
-                    // Save analytics data
-                    if (file_put_contents($analytics_file, json_encode($analytics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-                        echo json_encode(['success' => true]);
-                    } else {
-                        echo json_encode(['success' => false, 'message' => 'Analytics kaydedilemedi']);
-                    }
-                    break;
+            $siteId = intval($input['site_id'] ?? 0);
+            $location = $input['location'] ?? ''; // banner, popup, section1, section2
+            $today = date('Y-m-d');
+
+            $analytics_file = '../data/analytics.json';
+            $analytics = [];
+
+            if (file_exists($analytics_file)) {
+                $analytics = json_decode(file_get_contents($analytics_file), true);
+            }
+
+            // Initialize structure if not exists
+            if (!isset($analytics['site_clicks'])) {
+                $analytics['site_clicks'] = ['banner' => [], 'popup' => [], 'section1' => [], 'section2' => []];
+            }
+            if (!isset($analytics['daily_stats'])) {
+                $analytics['daily_stats'] = [];
+            }
+            if (!isset($analytics['total_stats'])) {
+                $analytics['total_stats'] = ['total_page_visits' => 0, 'total_site_clicks' => 0];
+            }
+
+            // Track click by location and site
+            if (!isset($analytics['site_clicks'][$location])) {
+                $analytics['site_clicks'][$location] = [];
+            }
+            if (!isset($analytics['site_clicks'][$location][$siteId])) {
+                $analytics['site_clicks'][$location][$siteId] = [];
+            }
+            if (!isset($analytics['site_clicks'][$location][$siteId][$today])) {
+                $analytics['site_clicks'][$location][$siteId][$today] = 0;
+            }
+
+            // Increment click count
+            $analytics['site_clicks'][$location][$siteId][$today]++;
+
+            // Update daily stats
+            if (!isset($analytics['daily_stats'][$today])) {
+                $analytics['daily_stats'][$today] = ['clicks' => 0, 'visits' => 0];
+            }
+            $analytics['daily_stats'][$today]['clicks']++;
+
+            // Update total stats
+            $analytics['total_stats']['total_site_clicks']++;
+
+            // Save analytics data
+            if (file_put_contents($analytics_file, json_encode($analytics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Analytics kaydedilemedi']);
+            }
+            break;
+
+        case 'track_visit':
+            $today = date('Y-m-d');
+
+            $analytics_file = '../data/analytics.json';
+            $analytics = [];
+
+            if (file_exists($analytics_file)) {
+                $analytics = json_decode(file_get_contents($analytics_file), true);
+            }
+
+            // Initialize structure if not exists
+            if (!isset($analytics['page_visits'])) {
+                $analytics['page_visits'] = [];
+            }
+            if (!isset($analytics['daily_stats'])) {
+                $analytics['daily_stats'] = [];
+            }
+            if (!isset($analytics['total_stats'])) {
+                $analytics['total_stats'] = ['total_page_visits' => 0, 'total_site_clicks' => 0];
+            }
+
+            // Track page visit
+            if (!isset($analytics['page_visits'][$today])) {
+                $analytics['page_visits'][$today] = 0;
+            }
+            $analytics['page_visits'][$today]++;
+
+            // Update daily stats
+            if (!isset($analytics['daily_stats'][$today])) {
+                $analytics['daily_stats'][$today] = ['clicks' => 0, 'visits' => 0];
+            }
+            $analytics['daily_stats'][$today]['visits']++;
+
+            // Update total stats
+            $analytics['total_stats']['total_page_visits']++;
+
+            // Save analytics data
+            if (file_put_contents($analytics_file, json_encode($analytics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Analytics kaydedilemedi']);
+            }
+            break;
     }
     exit;
 }
