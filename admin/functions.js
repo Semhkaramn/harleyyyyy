@@ -170,20 +170,37 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load GIF banners when the tab is accessed
     const gifBannersTab = document.getElementById('gif-banners-tab');
     if (gifBannersTab) {
-        gifBannersTab.addEventListener('shown.bs.tab', function() {
+        gifBannersTab.addEventListener('shown.bs.tab', async function() {
+            await loadSites(); // Sites yükle
             loadGifBanners();
         });
     }
 
-    // GIF Banner form handlers
+    // GIF Banner form handlers - onsubmit kullanarak sayfa yenilenmesini engelle
     const desktopGifForm = document.getElementById('desktopGifForm');
     if (desktopGifForm) {
-        desktopGifForm.addEventListener('submit', handleGifBannerSubmit);
+        desktopGifForm.onsubmit = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleGifBannerSubmit(e);
+            return false;
+        };
     }
 
     const mobileGifForm = document.getElementById('mobileGifForm');
     if (mobileGifForm) {
-        mobileGifForm.addEventListener('submit', handleGifBannerSubmit);
+        mobileGifForm.onsubmit = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleGifBannerSubmit(e);
+            return false;
+        };
+    }
+
+    // GIF Banner site selection change handler
+    const gifBannerSiteSelect = document.getElementById('gifBannerSiteId');
+    if (gifBannerSiteSelect) {
+        gifBannerSiteSelect.addEventListener('change', handleGifBannerSiteChange);
     }
 });
 
@@ -1547,9 +1564,61 @@ async function loadGifBanners() {
         if (data && data.gif_banners) {
             renderGifBanner('desktop', data.gif_banners.desktop);
             renderGifBanner('mobile', data.gif_banners.mobile);
+
+            // Site dropdown'unu doldur
+            populateGifBannerSiteDropdown(data.gif_banners.site_id || 0);
         }
     } catch (error) {
         console.error('GIF bannerlar yüklenirken hata:', error);
+    }
+}
+
+// GIF Banner için site dropdown'unu doldur
+function populateGifBannerSiteDropdown(selectedSiteId) {
+    const siteSelect = document.getElementById('gifBannerSiteId');
+    const linkInput = document.getElementById('gifBannerSelectedLink');
+
+    if (!siteSelect) return;
+
+    siteSelect.innerHTML = '<option value="">Site Seçin</option>';
+
+    allSites.forEach(site => {
+        const option = document.createElement('option');
+        option.value = site.id;
+        option.textContent = site.name;
+        if (site.id == selectedSiteId) {
+            option.selected = true;
+            if (linkInput) linkInput.value = site.link;
+        }
+        siteSelect.appendChild(option);
+    });
+}
+
+// GIF Banner site seçimi değiştiğinde
+async function handleGifBannerSiteChange(e) {
+    const siteId = parseInt(e.target.value) || 0;
+    const linkInput = document.getElementById('gifBannerSelectedLink');
+
+    // Seçilen sitenin linkini göster
+    const site = allSites.find(s => s.id == siteId);
+    if (linkInput) {
+        linkInput.value = site ? site.link : '';
+    }
+
+    // API'ye kaydet
+    const formData = new FormData();
+    formData.append('action', 'update_gif_banner_site');
+    formData.append('site_id', siteId);
+
+    const data = await apiRequest('api.php', {
+        method: 'POST',
+        body: formData
+    });
+
+    if (data && data.success) {
+        showToast('GIF banner site ayarı güncellendi');
+    } else {
+        popup.error(data?.message || 'Site ayarı güncellenemedi');
     }
 }
 
