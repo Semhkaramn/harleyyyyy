@@ -80,7 +80,11 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                     <i class="bi bi-grid-3x3-gap"></i> Slot Alanları
                 </button>
             </li>
-
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="gif-banners-tab" data-bs-toggle="tab" data-bs-target="#gif-banners" type="button">
+                    <i class="bi bi-film"></i> GIF Bannerlar
+                </button>
+            </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="popup-tab" data-bs-toggle="tab" data-bs-target="#popup" type="button">
                     <i class="bi bi-window"></i> Popup Ayarları
@@ -217,8 +221,181 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                 </div>
             </div>
 
+            <!-- GIF Bannerlar Tab -->
+            <div class="tab-pane fade" id="gif-banners" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Bilgi:</strong> GIF bannerlar header'ın hemen altında, arama çubuğunun üstünde görüntülenir.
+                            Masaüstü ve mobil için ayrı GIF/Video yükleyebilirsiniz. Görsel otomatik olarak ekrana tam sığacak şekilde ölçeklenir.
+                        </div>
+                    </div>
 
-<!-- Analiz Tab -->
+                    <!-- Masaüstü GIF Banner -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-display"></i> Masaüstü GIF Banner
+                                </h5>
+                                <span class="badge bg-secondary" id="desktopBannerStatus">Pasif</span>
+                            </div>
+                            <div class="card-body">
+                                <form id="desktopGifForm" enctype="multipart/form-data">
+                                    <input type="hidden" name="type" value="desktop">
+
+                                    <div class="mb-3">
+                                        <label class="form-label">GIF/Video Dosyası</label>
+                                        <div class="file-input-wrapper">
+                                            <input type="file" class="form-control" name="gif" id="desktopGifFile" accept="image/gif,image/webp,video/mp4,video/webm">
+                                        </div>
+                                        <small class="text-muted">Desteklenen formatlar: GIF, WEBP, MP4, WEBM - Maksimum 50MB</small>
+                                    </div>
+
+                                    <div class="mb-3" id="desktopPreviewContainer" style="display: none;">
+                                        <label class="form-label">Mevcut Banner</label>
+                                        <div class="banner-preview" id="desktopBannerPreview"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Tıklanınca Gidilecek Link</label>
+                                        <input type="url" class="form-control" name="link" id="desktopGifLink" placeholder="https://example.com">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="active" id="desktopGifActive">
+                                            <label class="form-check-label" for="desktopGifActive">
+                                                Banner Aktif
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-upload"></i> Yükle / Güncelle
+                                        </button>
+                                        <button type="button" class="btn btn-danger" onclick="deleteGifBanner('desktop')">
+                                            <i class="bi bi-trash"></i> Sil
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobil GIF Banner -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-phone"></i> Mobil GIF Banner
+                                </h5>
+                                <span class="badge bg-secondary" id="mobileBannerStatus">Pasif</span>
+                            </div>
+                            <div class="card-body">
+                                <form id="mobileGifForm" enctype="multipart/form-data">
+                                    <input type="hidden" name="type" value="mobile">
+
+                                    <div class="mb-3">
+                                        <label class="form-label">GIF/Video Dosyası</label>
+                                        <div class="file-input-wrapper">
+                                            <input type="file" class="form-control" name="gif" id="mobileGifFile" accept="image/gif,image/webp,video/mp4,video/webm">
+                                        </div>
+                                        <small class="text-muted">Desteklenen formatlar: GIF, WEBP, MP4, WEBM - Maksimum 50MB</small>
+                                    </div>
+
+                                    <div class="mb-3" id="mobilePreviewContainer" style="display: none;">
+                                        <label class="form-label">Mevcut Banner</label>
+                                        <div class="banner-preview" id="mobileBannerPreview"></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Tıklanınca Gidilecek Link</label>
+                                        <input type="url" class="form-control" name="link" id="mobileGifLink" placeholder="https://example.com">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="active" id="mobileGifActive">
+                                            <label class="form-check-label" for="mobileGifActive">
+                                                Banner Aktif
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-upload"></i> Yükle / Güncelle
+                                        </button>
+                                        <button type="button" class="btn btn-danger" onclick="deleteGifBanner('mobile')">
+                                            <i class="bi bi-trash"></i> Sil
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popup Ayarları Tab -->
+            <div class="tab-pane fade" id="popup" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-window"></i> Popup Ayarları
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="popupForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Popup Başlık</label>
+                                        <input type="text" class="form-control" autocomplete="off" name="popup_number" id="popupNumber" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Popup Başlık 2</label>
+                                        <input type="text" class="form-control" autocomplete="off" name="popup_title" id="popupTitle" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Popup Alt Başlığı</label>
+                                        <input type="text" class="form-control" autocomplete="off" name="popup_subtitle" id="popupSubtitle" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Site Seçimi</label>
+                                        <select class="form-select" autocomplete="off" name="popup_site_id" id="popupSiteId" required>
+
+                                            <!-- Siteler buraya yüklenecek -->
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Popup Aktif</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="popup_active" id="popupActive">
+                                            <label class="form-check-label" for="popupActive">
+                                                Popup'ı Aktif Et
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Ayarları Kaydet
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analiz Tab -->
             <div class="tab-pane fade" id="analytics" role="tabpanel">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h3>Analiz ve Raporlar</h3>
@@ -306,7 +483,6 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                     </div>
                 </div>
 
-                <!-- Filtre Seçenekleri -->
                 <!-- Filtre Seçenekleri -->
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -413,63 +589,6 @@ $is_super_admin = $current_user['role'] === 'super_admin';
                                         Hesap güvenliğiniz için düzenli olarak bilgilerinizi güncelleyin.
                                     </small>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-
-            <!-- Popup Ayarları Tab -->
-            <div class="tab-pane fade" id="popup" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-window"></i> Popup Ayarları
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <form id="popupForm">
-                                    <div class="mb-3">
-                                        <label class="form-label">Popup Başlık</label>
-                                        <input type="text" class="form-control" autocomplete="off" name="popup_number" id="popupNumber" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Popup Başlık 2</label>
-                                        <input type="text" class="form-control" autocomplete="off" name="popup_title" id="popupTitle" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Popup Alt Başlığı</label>
-                                        <input type="text" class="form-control" autocomplete="off" name="popup_subtitle" id="popupSubtitle" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Site Seçimi</label>
-                                        <select class="form-select" autocomplete="off" name="popup_site_id" id="popupSiteId" required>
-
-                                            <!-- Siteler buraya yüklenecek -->
-                                        </select>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Popup Aktif</label>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" name="popup_active" id="popupActive">
-                                            <label class="form-check-label" for="popupActive">
-                                                Popup'ı Aktif Et
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save"></i> Ayarları Kaydet
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     </div>
